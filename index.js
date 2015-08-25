@@ -70,7 +70,7 @@ app.post("/session", function(args) {
         var stored_pass = result[0].password;
         if (password === stored_pass) {
             var token = crypto.pseudoRandomBytes(32).toString('base64');
-            sessions[username] = token;
+            sessions[token] = username;
             response = JSON.stringify({ token: token });
         } else {
             response = app.error(401, "Unauthorized");
@@ -107,13 +107,13 @@ app.delete(new RegExp(/^\/session\/(\w+)$/), function(args) {
         return app.error(400, "Bad Request");
     }
 
-    var token = sessions[username];
+    var stored_username = sessions[authorization];
 
-    if (token !== authorization) {
+    if (stored_username !== username) {
         return app.error(401, "Unauthorized");
     }
 
-    if (delete sessions[username]) {
+    if (delete sessions[authorization]) {
         return { status: 200, message: "Session successfully deleted" };
     } else {
         return app.error(500, "Server Error");
